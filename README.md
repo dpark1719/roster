@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# roster
 
-## Getting Started
+Build 1: plan pages. A person creates a plan via a password-gated admin form; anyone with the link can view it and mark themselves in/maybe/can't with just a first name — no account, no app, no password.
 
-First, run the development server:
+See `BUILD-SPEC-01-plan-pages.md` (not committed here) for the full spec this implements.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Stack
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Next.js (App Router) + TypeScript
+- Postgres (Neon or Supabase free tier) via `drizzle-orm`/`postgres`
+- Tailwind CSS
+- `next/og` for dynamic per-plan share images
+- Vercel Analytics + a custom `events` table for instrumentation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Copy `.env.example` to `.env` and fill in:
+   - `DATABASE_URL` — a Postgres connection string (Neon or Supabase free tier)
+   - `ADMIN_PASSWORD` — the shared password for `/admin`
+   - `COOKIE_SECRET` — a random 32+ char string (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`)
 
-## Learn More
+2. Push the schema to your database:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   npm run db:push
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Run the dev server:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   npm run dev
+   ```
 
-## Deploy on Vercel
+4. Visit `/admin`, log in with `ADMIN_PASSWORD`, and create a plan. The public page is at `/p/[slug]`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Routes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `/admin` — plan list (upcoming/past), gated by `ADMIN_PASSWORD`
+- `/admin/new`, `/admin/[id]` — create/edit a plan, view its responses
+- `/admin/metrics` — 7/28-day instrumentation dashboard
+- `/p/[slug]` — the public plan page (no auth)
+- `/p/[slug]/ics` — calendar download
+- `/p/[slug]/opengraph-image` — dynamic share image
+
+## Database scripts
+
+- `npm run db:generate` — generate a SQL migration from `db/schema.ts`
+- `npm run db:push` — push the schema directly (fastest for early development)
+- `npm run db:studio` — open Drizzle Studio
