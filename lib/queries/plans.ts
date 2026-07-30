@@ -9,6 +9,8 @@ export type PlanInput = {
   endsAt?: Date | null;
   locationName: string;
   locationNote?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   description?: string | null;
   hostName: string;
   category?: string | null;
@@ -17,6 +19,7 @@ export type PlanInput = {
   externalUrl?: string | null;
   imageUrl?: string | null;
   isPublished?: boolean;
+  isFeatured?: boolean;
 };
 
 export async function createPlan(input: PlanInput) {
@@ -105,6 +108,8 @@ export async function duplicatePlan(id: string) {
     endsAt: original.endsAt,
     locationName: original.locationName,
     locationNote: original.locationNote,
+    latitude: original.latitude,
+    longitude: original.longitude,
     description: original.description,
     hostName: original.hostName,
     category: original.category,
@@ -113,5 +118,34 @@ export async function duplicatePlan(id: string) {
     externalUrl: original.externalUrl,
     imageUrl: original.imageUrl,
     isPublished: false,
+    isFeatured: false,
+  });
+}
+
+export async function getFeaturedPlans() {
+  const now = new Date();
+  return db.query.plans.findMany({
+    where: and(eq(plans.isFeatured, true), eq(plans.isPublished, true), gte(plans.startsAt, now)),
+    orderBy: asc(plans.startsAt),
+  });
+}
+
+export async function getMapPlans() {
+  const now = new Date();
+  return db.query.plans.findMany({
+    where: and(
+      eq(plans.isPublished, true),
+      gte(plans.startsAt, now),
+      sql`${plans.latitude} is not null and ${plans.longitude} is not null`
+    ),
+    orderBy: asc(plans.startsAt),
+  });
+}
+
+export async function getCalendarPlans() {
+  const now = new Date();
+  return db.query.plans.findMany({
+    where: and(eq(plans.isPublished, true), gte(plans.startsAt, now)),
+    orderBy: asc(plans.startsAt),
   });
 }

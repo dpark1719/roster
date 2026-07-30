@@ -4,6 +4,8 @@ export interface PlanFormValues {
   endsAt: string;
   locationName: string;
   locationNote: string;
+  latitude: string;
+  longitude: string;
   description: string;
   hostName: string;
   category: string;
@@ -12,6 +14,7 @@ export interface PlanFormValues {
   externalUrl: string;
   imageUrl: string;
   isPublished: boolean;
+  isFeatured: boolean;
 }
 
 function defaultStartsAt(): string {
@@ -42,6 +45,8 @@ export function emptyPlanForm(lastLocation = "", lastHost = ""): PlanFormValues 
     endsAt: "",
     locationName: lastLocation,
     locationNote: "",
+    latitude: "",
+    longitude: "",
     description: "",
     hostName: lastHost,
     category: "",
@@ -50,6 +55,7 @@ export function emptyPlanForm(lastLocation = "", lastHost = ""): PlanFormValues 
     externalUrl: "",
     imageUrl: "",
     isPublished: true,
+    isFeatured: false,
   };
 }
 
@@ -59,6 +65,8 @@ export function planToFormValues(plan: {
   endsAt: string | null;
   locationName: string;
   locationNote: string | null;
+  latitude: number | null;
+  longitude: number | null;
   description: string | null;
   hostName: string;
   category: string | null;
@@ -67,6 +75,7 @@ export function planToFormValues(plan: {
   externalUrl: string | null;
   imageUrl: string | null;
   isPublished: boolean;
+  isFeatured: boolean;
 }): PlanFormValues {
   return {
     title: plan.title,
@@ -74,6 +83,8 @@ export function planToFormValues(plan: {
     endsAt: toDatetimeLocal(plan.endsAt),
     locationName: plan.locationName,
     locationNote: plan.locationNote ?? "",
+    latitude: plan.latitude != null ? String(plan.latitude) : "",
+    longitude: plan.longitude != null ? String(plan.longitude) : "",
     description: plan.description ?? "",
     hostName: plan.hostName,
     category: plan.category ?? "",
@@ -82,5 +93,6 @@ export function planToFormValues(plan: {
     externalUrl: plan.externalUrl ?? "",
     imageUrl: plan.imageUrl ?? "",
     isPublished: plan.isPublished,
+    isFeatured: plan.isFeatured,
   };
 }

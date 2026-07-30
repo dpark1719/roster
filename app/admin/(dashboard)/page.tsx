@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listPlans } from "@/lib/queries/plans";
 import { formatPlanTime } from "@/lib/format-time";
 import { DuplicateButton } from "./duplicate-button";
+import { SyncButton } from "./sync-button";
 
 export const dynamic = "force-dynamic";
 
@@ -12,12 +13,15 @@ export default async function AdminPlansPage() {
     <div className="space-y-9">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Plans</h1>
-        <Link
-          href="/admin/new"
-          className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--accent-foreground)]"
-        >
-          + New plan
-        </Link>
+        <div className="flex items-center gap-3">
+          <SyncButton />
+          <Link
+            href="/admin/new"
+            className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--accent-foreground)]"
+          >
+            + New plan
+          </Link>
+        </div>
       </div>
 
       <section>
@@ -49,6 +53,7 @@ function PlanList({
     isPublished: boolean;
     minNeeded: number | null;
     inCount: number;
+    source: string | null;
   }>;
 }) {
   if (plans.length === 0) {
@@ -68,6 +73,11 @@ function PlanList({
               {!plan.isPublished && (
                 <span className="shrink-0 rounded-full bg-[var(--border)] px-2 py-0.5 text-[11px] font-medium text-[var(--muted)]">
                   draft
+                </span>
+              )}
+              {plan.source && (
+                <span className="shrink-0 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[11px] font-medium text-[var(--accent)]">
+                  auto
                 </span>
               )}
             </div>

@@ -32,6 +32,17 @@ export default async function AdminDashboardLayout({
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <div className="flex gap-4 border-r border-[var(--border)] pr-4 text-sm text-[var(--muted-2)]">
+              <Link href="/" target="_blank" className="hover:text-[var(--foreground)]">
+                Homepage ↗
+              </Link>
+              <Link href="/map" target="_blank" className="hover:text-[var(--foreground)]">
+                Map ↗
+              </Link>
+              <Link href="/calendar" target="_blank" className="hover:text-[var(--foreground)]">
+                Calendar ↗
+              </Link>
+            </div>
             <ThemeToggle />
             <form action="/api/admin/logout" method="post">
               <button className="text-sm text-[var(--muted-2)] hover:text-[var(--foreground)]">

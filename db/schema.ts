@@ -8,6 +8,7 @@ import {
   bigserial,
   jsonb,
   unique,
+  doublePrecision,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -19,6 +20,8 @@ export const plans = pgTable("plans", {
   endsAt: timestamp("ends_at", { withTimezone: true }),
   locationName: text("location_name").notNull(),
   locationNote: text("location_note"),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
   description: text("description"),
   hostName: text("host_name").notNull(),
   category: text("category"),
@@ -27,13 +30,17 @@ export const plans = pgTable("plans", {
   externalUrl: text("external_url"),
   imageUrl: text("image_url"),
   isPublished: boolean("is_published").notNull().default(false),
+  isFeatured: boolean("is_featured").notNull().default(false),
+  source: text("source"), // null = manually created by admin
+  sourceUid: text("source_uid"), // stable id from the source feed, for dedup + reschedule detection
+  lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .default(sql`now()`),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .default(sql`now()`),
-});
+}, (table) => [unique().on(table.source, table.sourceUid)]);
 
 export const responses = pgTable(
   "responses",

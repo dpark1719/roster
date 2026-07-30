@@ -9,6 +9,8 @@ function parsePlanBody(body: Record<string, unknown>) {
     endsAt: body.endsAt ? new Date(String(body.endsAt)) : null,
     locationName: String(body.locationName ?? "").trim(),
     locationNote: body.locationNote ? String(body.locationNote) : null,
+    latitude: body.latitude != null && body.latitude !== "" ? Number(body.latitude) : null,
+    longitude: body.longitude != null && body.longitude !== "" ? Number(body.longitude) : null,
     description: body.description ? String(body.description) : null,
     hostName: String(body.hostName ?? "").trim(),
     category: body.category ? String(body.category) : null,
@@ -17,6 +19,7 @@ function parsePlanBody(body: Record<string, unknown>) {
     externalUrl: body.externalUrl ? String(body.externalUrl) : null,
     imageUrl: body.imageUrl ? String(body.imageUrl) : null,
     isPublished: Boolean(body.isPublished),
+    isFeatured: Boolean(body.isFeatured),
   };
 }
 

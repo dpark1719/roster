@@ -58,7 +58,10 @@ export function PlanForm({
       capacity: values.capacity || null,
       externalUrl: values.externalUrl || null,
       imageUrl: values.imageUrl || null,
+      latitude: values.latitude || null,
+      longitude: values.longitude || null,
       isPublished: values.isPublished,
+      isFeatured: values.isFeatured,
     };
 
     const url = planId ? `/api/admin/plans/${planId}` : "/api/admin/plans";
@@ -152,6 +155,35 @@ export function PlanForm({
         />
       </div>
 
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-sm font-medium text-[var(--foreground)]">
+            Latitude (optional)
+          </label>
+          <input
+            value={values.latitude}
+            onChange={(e) => update("latitude", e.target.value)}
+            placeholder="43.0752"
+            className="mt-1 w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-[var(--foreground)]">
+            Longitude (optional)
+          </label>
+          <input
+            value={values.longitude}
+            onChange={(e) => update("longitude", e.target.value)}
+            placeholder="-89.4009"
+            className="mt-1 w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
+          />
+        </div>
+      </div>
+      <p className="-mt-2 text-xs text-[var(--muted-2)]">
+        Needed to show this plan on the map. Look up coordinates on Google Maps: right-click the
+        spot → click the lat/long shown.
+      </p>
+
       <div>
         <label className="block text-sm font-medium text-[var(--foreground)]">Description (optional)</label>
         <textarea
@@ -235,15 +267,26 @@ export function PlanForm({
         )}
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-[var(--foreground)]">
-        <input
-          type="checkbox"
-          checked={values.isPublished}
-          onChange={(e) => update("isPublished", e.target.checked)}
-          className="accent-[var(--accent)]"
-        />
-        Published
-      </label>
+      <div className="flex gap-5">
+        <label className="flex items-center gap-2 text-sm text-[var(--foreground)]">
+          <input
+            type="checkbox"
+            checked={values.isPublished}
+            onChange={(e) => update("isPublished", e.target.checked)}
+            className="accent-[var(--accent)]"
+          />
+          Published
+        </label>
+        <label className="flex items-center gap-2 text-sm text-[var(--foreground)]">
+          <input
+            type="checkbox"
+            checked={values.isFeatured}
+            onChange={(e) => update("isFeatured", e.target.checked)}
+            className="accent-[var(--accent)]"
+          />
+          Feature on homepage
+        </label>
+      </div>
 
       {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
 
