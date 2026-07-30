@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { plans, responses } from "@/db/schema";
-import { eq, desc, asc, gte, lt, and } from "drizzle-orm";
+import { eq, desc, asc, gte, lt, and, inArray, sql } from "drizzle-orm";
 import { generateSlug } from "@/lib/slug";
 
 export type PlanInput = {
@@ -69,7 +69,22 @@ export async function listPlans() {
       limit: 50,
     }),
   ]);
-  return { upcoming, past };
+
+  const allIds = [...upcoming, ...past].map((p) => p.id);
+  const counts = allIds.length
+    ? await db
+        .select({ planId: responses.planId, count: sql<number>`count(*)` })
+        .from(responses)
+        .where(and(inArray(responses.planId, allIds), eq(responses.status, "in")))
+        .groupBy(responses.planId)
+    : [];
+
+  const countMap = new Map(counts.map((c) => [c.planId, Number(c.count)]));
+
+  const withCounts = <T extends { id: string }>(list: T[]) =>
+    list.map((p) => ({ ...p, inCount: countMap.get(p.id) ?? 0 }));
+
+  return { upcoming: withCounts(upcoming), past: withCounts(past) };
 }
 
 export async function getResponsesForPlan(planId: string) {

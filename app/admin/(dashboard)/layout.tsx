@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { isAdminAuthenticated } from "@/lib/session";
+import { ThemeToggle } from "@/lib/theme-toggle";
 
 export default async function AdminDashboardLayout({
   children,
@@ -14,21 +15,33 @@ export default async function AdminDashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <nav className="border-b border-neutral-200 bg-white px-4 py-3">
-        <div className="mx-auto flex max-w-4xl items-center justify-between">
-          <div className="flex gap-4 text-sm font-medium">
-            <Link href="/admin">Plans</Link>
-            <Link href="/admin/metrics">Metrics</Link>
+    <div className="min-h-screen bg-[var(--background)]">
+      <nav className="border-b border-[var(--border)] bg-[var(--surface)] px-5 py-3.5">
+        <div className="mx-auto flex max-w-3xl items-center justify-between">
+          <div className="flex items-center gap-5">
+            <span className="text-sm font-bold tracking-tight text-[var(--foreground)]">
+              roster
+            </span>
+            <div className="flex gap-4 text-sm font-medium text-[var(--muted)]">
+              <Link href="/admin" className="hover:text-[var(--foreground)]">
+                Plans
+              </Link>
+              <Link href="/admin/metrics" className="hover:text-[var(--foreground)]">
+                Metrics
+              </Link>
+            </div>
           </div>
-          <form action="/api/admin/logout" method="post">
-            <button className="text-sm text-neutral-500 hover:text-neutral-900">
-              Log out
-            </button>
-          </form>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <form action="/api/admin/logout" method="post">
+              <button className="text-sm text-[var(--muted-2)] hover:text-[var(--foreground)]">
+                Log out
+              </button>
+            </form>
+          </div>
         </div>
       </nav>
-      <main className="mx-auto max-w-4xl px-4 py-6">{children}</main>
+      <main className="mx-auto max-w-3xl px-5 py-8">{children}</main>
     </div>
   );
 }

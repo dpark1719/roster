@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { track } from "@/lib/track";
+import { CheckIcon, QuestionIcon, XIcon, ShareIcon } from "@/lib/icons";
 
 type Status = "in" | "maybe" | "out";
 
@@ -30,6 +32,7 @@ export function ResponseWidget({
   const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [shareState, setShareState] = useState<"idle" | "shared">("idle");
+  const router = useRouter();
 
   function startResponse(status: Status) {
     if (!response) {
@@ -57,6 +60,7 @@ export function ResponseWidget({
     if (res.ok) {
       setResponse({ status: pendingStatus, displayName: name.trim() });
       setPendingStatus(null);
+      router.refresh();
     }
   }
 
@@ -83,65 +87,74 @@ export function ResponseWidget({
 
   if (response) {
     return (
-      <div className="space-y-3">
-        <div className="rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3">
-          <p className="text-sm">
+      <div className="animate-fade-in-up space-y-3">
+        <div className="flex items-center justify-between rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
+          <p className="text-sm text-[var(--foreground)]">
             You&apos;re marked as{" "}
             <span className="font-semibold">
-              {response.status === "in" ? "in" : response.status === "maybe" ? "maybe" : "can't make it"}
+              {response.status === "in"
+                ? "in"
+                : response.status === "maybe"
+                  ? "maybe"
+                  : "can't make it"}
             </span>
-            .{" "}
-            <button
-              onClick={() => setPendingStatus(response.status)}
-              className="font-medium text-blue-600 underline"
-            >
-              Change
-            </button>
           </p>
+          <button
+            onClick={() => setPendingStatus(response.status)}
+            className="text-sm font-semibold text-[var(--accent)]"
+          >
+            Change
+          </button>
         </div>
 
         {pendingStatus && (
-          <ResponseForm
-            name={name}
-            setName={setName}
-            wantsReminder={wantsReminder}
-            setWantsReminder={setWantsReminder}
-            phone={phone}
-            setPhone={setPhone}
-            submitting={submitting}
-            onSubmit={submitResponse}
-            onCancel={() => setPendingStatus(null)}
-            statusButtons={<StatusButtons active={pendingStatus} onSelect={setPendingStatus} isFull={isFull} />}
-          />
+          <div className="animate-fade-in-up">
+            <ResponseForm
+              name={name}
+              setName={setName}
+              wantsReminder={wantsReminder}
+              setWantsReminder={setWantsReminder}
+              phone={phone}
+              setPhone={setPhone}
+              submitting={submitting}
+              onSubmit={submitResponse}
+              onCancel={() => setPendingStatus(null)}
+              statusButtons={
+                <StatusButtons active={pendingStatus} onSelect={setPendingStatus} isFull={isFull} />
+              }
+            />
+          </div>
         )}
 
-        <div className="rounded-lg border border-dashed border-neutral-300 px-4 py-3">
-          <p className="mb-2 text-sm font-medium">Know someone who&apos;d come? Send them this.</p>
-          <button
-            onClick={handleShare}
-            className="w-full rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white"
-          >
-            {shareState === "shared" ? "Link copied!" : "Share this plan"}
-          </button>
-        </div>
+        <button
+          onClick={handleShare}
+          className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--accent)] px-4 py-3.5 text-sm font-semibold text-[var(--accent-foreground)] transition active:scale-[0.98]"
+        >
+          <ShareIcon className={`h-4 w-4 ${shareState === "shared" ? "animate-pop-in" : ""}`} />
+          {shareState === "shared" ? "Link copied!" : "Know someone who'd come? Send this."}
+        </button>
       </div>
     );
   }
 
   if (pendingStatus) {
     return (
-      <ResponseForm
-        name={name}
-        setName={setName}
-        wantsReminder={wantsReminder}
-        setWantsReminder={setWantsReminder}
-        phone={phone}
-        setPhone={setPhone}
-        submitting={submitting}
-        onSubmit={submitResponse}
-        onCancel={() => setPendingStatus(null)}
-        statusButtons={<StatusButtons active={pendingStatus} onSelect={setPendingStatus} isFull={isFull} />}
-      />
+      <div className="animate-fade-in-up">
+        <ResponseForm
+          name={name}
+          setName={setName}
+          wantsReminder={wantsReminder}
+          setWantsReminder={setWantsReminder}
+          phone={phone}
+          setPhone={setPhone}
+          submitting={submitting}
+          onSubmit={submitResponse}
+          onCancel={() => setPendingStatus(null)}
+          statusButtons={
+            <StatusButtons active={pendingStatus} onSelect={setPendingStatus} isFull={isFull} />
+          }
+        />
+      </div>
     );
   }
 
@@ -157,30 +170,43 @@ function StatusButtons({
   onSelect: (status: Status) => void;
   isFull: boolean;
 }) {
-  const base =
-    "flex-1 rounded-lg px-3 py-3 text-sm font-semibold transition active:scale-95";
-  const selected = "bg-neutral-900 text-white";
-  const unselected = "bg-neutral-100 text-neutral-900";
-
   return (
     <div className="flex gap-2">
       <button
         onClick={() => !isFull && onSelect("in")}
         disabled={isFull}
-        className={`${base} ${active === "in" ? selected : unselected} ${isFull ? "opacity-50" : ""}`}
+        className={`flex flex-1 flex-col items-center gap-1 rounded-[var(--radius-md)] px-2 py-3.5 text-sm font-semibold transition active:scale-[0.97] ${
+          isFull
+            ? "bg-[var(--border)] text-[var(--muted-2)]"
+            : active === "in"
+              ? "bg-[var(--success)] text-white"
+              : "bg-[var(--success-soft)] text-[var(--success)]"
+        }`}
       >
+        <CheckIcon className="h-5 w-5" />
         {isFull ? "Full" : "I'm in"}
       </button>
       <button
         onClick={() => onSelect("maybe")}
-        className={`${base} ${active === "maybe" ? selected : unselected}`}
+        className="flex flex-1 flex-col items-center gap-1 rounded-[var(--radius-md)] px-2 py-3.5 text-sm font-semibold transition active:scale-[0.97]"
+        style={
+          active === "maybe"
+            ? { background: "var(--warning)", color: "white" }
+            : { background: "var(--warning-soft)", color: "var(--warning)" }
+        }
       >
+        <QuestionIcon className="h-5 w-5" />
         Maybe
       </button>
       <button
         onClick={() => onSelect("out")}
-        className={`${base} ${active === "out" ? selected : unselected}`}
+        className={`flex flex-1 flex-col items-center gap-1 rounded-[var(--radius-md)] px-2 py-3.5 text-sm font-semibold transition active:scale-[0.97] ${
+          active === "out"
+            ? "bg-[var(--foreground)] text-[var(--background)]"
+            : "bg-[var(--border)] text-[var(--muted)]"
+        }`}
       >
+        <XIcon className="h-5 w-5" />
         Can&apos;t
       </button>
     </div>
@@ -211,7 +237,10 @@ function ResponseForm({
   statusButtons: React.ReactNode;
 }) {
   return (
-    <form onSubmit={onSubmit} className="space-y-2 rounded-lg border border-neutral-200 p-3">
+    <form
+      onSubmit={onSubmit}
+      className="space-y-3 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-card)]"
+    >
       {statusButtons}
       <input
         autoFocus
@@ -219,13 +248,14 @@ function ResponseForm({
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="First name, last initial"
-        className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+        className="w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 text-[15px] text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
       />
-      <label className="flex items-center gap-2 text-xs text-neutral-500">
+      <label className="flex items-center gap-2 text-[13px] text-[var(--muted)]">
         <input
           type="checkbox"
           checked={wantsReminder}
           onChange={(e) => setWantsReminder(e.target.checked)}
+          className="accent-[var(--accent)]"
         />
         Text me a reminder the day of
       </label>
@@ -235,21 +265,21 @@ function ResponseForm({
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="Phone number"
-          className="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm"
+          className="w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 text-[15px] text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
         />
       )}
       <div className="flex gap-2">
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 rounded-md border border-neutral-300 px-3 py-2 text-sm"
+          className="flex-1 rounded-[var(--radius-sm)] border border-[var(--border)] py-2.5 text-sm font-medium text-[var(--foreground)]"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={submitting || !name.trim()}
-          className="flex-1 rounded-md bg-neutral-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="flex-1 rounded-[var(--radius-sm)] bg-[var(--accent)] py-2.5 text-sm font-semibold text-[var(--accent-foreground)] disabled:opacity-50"
         >
           {submitting ? "Saving..." : "Confirm"}
         </button>
