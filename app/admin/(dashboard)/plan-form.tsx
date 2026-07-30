@@ -57,6 +57,7 @@ export function PlanForm({
       minNeeded: values.minNeeded || null,
       capacity: values.capacity || null,
       externalUrl: values.externalUrl || null,
+      imageUrl: values.imageUrl || null,
       isPublished: values.isPublished,
     };
 
@@ -214,6 +215,24 @@ export function PlanForm({
           placeholder="https://..."
           className="mt-1 w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-[var(--foreground)]">Photo URL (optional)</label>
+        <input
+          value={values.imageUrl}
+          onChange={(e) => update("imageUrl", e.target.value)}
+          placeholder="https://... (a photo you have rights to use)"
+          className="mt-1 w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
+        />
+        {values.imageUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={values.imageUrl}
+            alt=""
+            className="mt-2 h-32 w-full rounded-[var(--radius-sm)] object-cover"
+          />
+        )}
       </div>
 
       <label className="flex items-center gap-2 text-sm text-[var(--foreground)]">

@@ -72,6 +72,15 @@ export default async function PlanPage({
       <ViewTracker planId={plan.id} />
 
       <div className="mx-auto max-w-md px-5 pb-16 pt-10">
+        {plan.imageUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={plan.imageUrl}
+            alt=""
+            className="animate-fade-in-up mb-4 h-48 w-full rounded-[var(--radius-lg)] object-cover shadow-[var(--shadow-card)]"
+          />
+        )}
+
         <div className="mb-3 flex items-start justify-between">
           {plan.category ? (
             <span className="inline-block rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[var(--accent)]">

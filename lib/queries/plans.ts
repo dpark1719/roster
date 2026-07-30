@@ -15,6 +15,7 @@ export type PlanInput = {
   minNeeded?: number | null;
   capacity?: number | null;
   externalUrl?: string | null;
+  imageUrl?: string | null;
   isPublished?: boolean;
 };
 
@@ -110,6 +111,7 @@ export async function duplicatePlan(id: string) {
     minNeeded: original.minNeeded,
     capacity: original.capacity,
     externalUrl: original.externalUrl,
+    imageUrl: original.imageUrl,
     isPublished: false,
   });
 }

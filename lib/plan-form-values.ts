@@ -10,6 +10,7 @@ export interface PlanFormValues {
   minNeeded: string;
   capacity: string;
   externalUrl: string;
+  imageUrl: string;
   isPublished: boolean;
 }
 
@@ -47,6 +48,7 @@ export function emptyPlanForm(lastLocation = "", lastHost = ""): PlanFormValues 
     minNeeded: "",
     capacity: "",
     externalUrl: "",
+    imageUrl: "",
     isPublished: true,
   };
 }
@@ -63,6 +65,7 @@ export function planToFormValues(plan: {
   minNeeded: number | null;
   capacity: number | null;
   externalUrl: string | null;
+  imageUrl: string | null;
   isPublished: boolean;
 }): PlanFormValues {
   return {
@@ -77,6 +80,7 @@ export function planToFormValues(plan: {
     minNeeded: plan.minNeeded != null ? String(plan.minNeeded) : "",
     capacity: plan.capacity != null ? String(plan.capacity) : "",
     externalUrl: plan.externalUrl ?? "",
+    imageUrl: plan.imageUrl ?? "",
     isPublished: plan.isPublished,
   };
 }

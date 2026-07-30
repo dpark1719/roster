@@ -50,14 +50,43 @@ export default async function OpengraphImage({
           flexDirection: "column",
           justifyContent: "space-between",
           padding: 64,
-          background: "linear-gradient(135deg, #18181b 0%, #27272a 100%)",
+          position: "relative",
+          background: plan.imageUrl
+            ? "#18181b"
+            : "linear-gradient(135deg, #18181b 0%, #27272a 100%)",
           color: "white",
           fontFamily: "sans-serif",
         }}
       >
+        {plan.imageUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={plan.imageUrl}
+            alt=""
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              opacity: 0.55,
+            }}
+          />
+        )}
+        {plan.imageUrl && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(180deg, rgba(24,24,27,0.2) 0%, rgba(24,24,27,0.9) 100%)",
+            }}
+          />
+        )}
         <div
           style={{
             display: "flex",
+            position: "relative",
             fontSize: 28,
             color: "#a1a1aa",
             letterSpacing: 2,
@@ -69,6 +98,7 @@ export default async function OpengraphImage({
         <div
           style={{
             display: "flex",
+            position: "relative",
             fontSize: 72,
             fontWeight: 700,
             lineHeight: 1.1,
@@ -79,6 +109,7 @@ export default async function OpengraphImage({
         <div
           style={{
             display: "flex",
+            position: "relative",
             fontSize: 36,
             fontWeight: 600,
             color: headCount.isMet ? "#4ade80" : "#fafafa",

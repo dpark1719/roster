@@ -15,6 +15,7 @@ function parsePlanBody(body: Record<string, unknown>) {
     minNeeded: body.minNeeded != null && body.minNeeded !== "" ? Number(body.minNeeded) : null,
     capacity: body.capacity != null && body.capacity !== "" ? Number(body.capacity) : null,
     externalUrl: body.externalUrl ? String(body.externalUrl) : null,
+    imageUrl: body.imageUrl ? String(body.imageUrl) : null,
     isPublished: Boolean(body.isPublished),
   };
 }

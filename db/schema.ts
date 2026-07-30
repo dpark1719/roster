@@ -25,6 +25,7 @@ export const plans = pgTable("plans", {
   minNeeded: integer("min_needed"),
   capacity: integer("capacity"),
   externalUrl: text("external_url"),
+  imageUrl: text("image_url"),
   isPublished: boolean("is_published").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
