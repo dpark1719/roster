@@ -122,12 +122,17 @@ export async function duplicatePlan(id: string) {
   });
 }
 
-export async function getFeaturedPlans() {
+export async function getHomepagePlans() {
   const now = new Date();
-  return db.query.plans.findMany({
-    where: and(eq(plans.isFeatured, true), eq(plans.isPublished, true), gte(plans.startsAt, now)),
+  const all = await db.query.plans.findMany({
+    where: and(eq(plans.isPublished, true), gte(plans.startsAt, now)),
     orderBy: asc(plans.startsAt),
   });
+
+  // Featured plans pin to the top (soonest-first among themselves), then everything else.
+  const featured = all.filter((p) => p.isFeatured);
+  const rest = all.filter((p) => !p.isFeatured);
+  return [...featured, ...rest];
 }
 
 export async function getMapPlans() {
