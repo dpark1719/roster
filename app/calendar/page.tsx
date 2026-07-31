@@ -1,9 +1,13 @@
 import Link from "next/link";
+import { format } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import { getCalendarPlans } from "@/lib/queries/plans";
-import { buildMonthGrid, dateKey, intensityOpacity } from "@/lib/calendar";
+import { buildMonthGrid, dateKey, zonedDateKey, intensityOpacity } from "@/lib/calendar";
 import { formatPlanTime } from "@/lib/format-time";
 import { PublicNav } from "@/lib/public-nav";
 import { ClockIcon, PinIcon } from "@/lib/icons";
+
+const TIME_ZONE = "America/Chicago";
 
 export const dynamic = "force-dynamic";
 
@@ -20,9 +24,10 @@ export default async function CalendarPage({
 }) {
   const { month: monthParam } = await searchParams;
   const today = new Date();
+  const zonedToday = toZonedTime(today, TIME_ZONE);
 
-  let year = today.getFullYear();
-  let month = today.getMonth();
+  let year = zonedToday.getFullYear();
+  let month = zonedToday.getMonth();
   if (monthParam) {
     const [y, m] = monthParam.split("-").map(Number);
     if (y && m) {
@@ -36,7 +41,7 @@ export default async function CalendarPage({
 
   const plansByDay = new Map<string, typeof plans>();
   for (const plan of plans) {
-    const key = dateKey(new Date(plan.startsAt));
+    const key = zonedDateKey(new Date(plan.startsAt));
     if (!plansByDay.has(key)) plansByDay.set(key, []);
     plansByDay.get(key)!.push(plan);
   }
@@ -46,7 +51,7 @@ export default async function CalendarPage({
 
   const visibleDayKeys = new Set(grid.map((d) => d.key));
   const upcomingInMonth = plans
-    .filter((p) => visibleDayKeys.has(dateKey(new Date(p.startsAt))))
+    .filter((p) => visibleDayKeys.has(zonedDateKey(new Date(p.startsAt))))
     .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
 
   return (
@@ -115,18 +120,17 @@ export default async function CalendarPage({
           ) : (
             Object.entries(
               upcomingInMonth.reduce<Record<string, typeof plans>>((acc, plan) => {
-                const key = dateKey(new Date(plan.startsAt));
+                const key = zonedDateKey(new Date(plan.startsAt));
                 (acc[key] ??= []).push(plan);
                 return acc;
               }, {})
             ).map(([key, dayPlans]) => (
               <div key={key} id={key} className="scroll-mt-6">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted-2)]">
-                  {new Date(dayPlans[0].startsAt).toLocaleDateString(undefined, {
-                    weekday: "long",
-                    month: "long",
-                    day: "numeric",
-                  })}
+                  {format(
+                    toZonedTime(new Date(dayPlans[0].startsAt), TIME_ZONE),
+                    "EEEE, MMMM d"
+                  )}
                 </p>
                 <div className="space-y-2">
                   {dayPlans.map((plan) => (

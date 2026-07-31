@@ -3,7 +3,21 @@ import { db } from "@/db";
 import { plans } from "@/db/schema";
 import { and, eq, inArray, lt } from "drizzle-orm";
 import { generateSlug } from "@/lib/slug";
+import { geocodeLocation, sleep } from "@/lib/geocode";
 import type { FeedSource } from "./config";
+
+// One geocode lookup per unique location string per sync run (many events
+// share a venue), spaced 1/sec per Nominatim's usage policy.
+async function geocodeCached(
+  location: string,
+  cache: Map<string, { latitude: number; longitude: number } | null>
+): Promise<{ latitude: number; longitude: number } | null> {
+  if (cache.has(location)) return cache.get(location)!;
+  await sleep(1100);
+  const result = await geocodeLocation(location);
+  cache.set(location, result);
+  return result;
+}
 
 const BAD_LOCATION_MARKERS = ["sign in to download", "online"];
 
@@ -50,6 +64,7 @@ export async function syncSource(source: FeedSource): Promise<SyncResult> {
   }
 
   const now = new Date();
+  const geocodeCache = new Map<string, { latitude: number; longitude: number } | null>();
 
   for (const item of Object.values(events)) {
     if (!item || item.type !== "VEVENT") continue;
@@ -79,6 +94,10 @@ export async function syncSource(source: FeedSource): Promise<SyncResult> {
     });
 
     if (existing) {
+      const locationChanged = existing.locationName !== location;
+      const needsCoords = locationChanged || existing.latitude == null;
+      const coords = needsCoords ? await geocodeCached(location, geocodeCache) : null;
+
       await db
         .update(plans)
         .set({
@@ -86,6 +105,7 @@ export async function syncSource(source: FeedSource): Promise<SyncResult> {
           startsAt,
           endsAt,
           locationName: location,
+          ...(coords && { latitude: coords.latitude, longitude: coords.longitude }),
           description,
           externalUrl,
           lastSyncedAt: now,
@@ -94,12 +114,16 @@ export async function syncSource(source: FeedSource): Promise<SyncResult> {
         .where(eq(plans.id, existing.id));
       result.updated++;
     } else {
+      const coords = await geocodeCached(location, geocodeCache);
+
       await db.insert(plans).values({
         slug: generateSlug(),
         title,
         startsAt,
         endsAt,
         locationName: location,
+        latitude: coords?.latitude ?? null,
+        longitude: coords?.longitude ?? null,
         description,
         hostName: organizer || source.defaultHostName,
         category: source.category,

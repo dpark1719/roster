@@ -1,6 +1,16 @@
+import { toZonedTime } from "date-fns-tz";
+
+const TIME_ZONE = "America/Chicago";
+
+// For a plain calendar date (e.g. a grid cell built from year/month/day) — no TZ conversion.
 export function dateKey(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+// For a real instant (e.g. plan.startsAt or "now") — resolves which Madison-local day it falls on.
+export function zonedDateKey(instant: Date): string {
+  return dateKey(toZonedTime(instant, TIME_ZONE));
 }
 
 export interface CalendarDay {
@@ -15,7 +25,7 @@ export function buildMonthGrid(year: number, month: number, today: Date): Calend
   const startOffset = firstOfMonth.getDay(); // 0 = Sunday
   const gridStart = new Date(year, month, 1 - startOffset);
 
-  const todayKey = dateKey(today);
+  const todayKey = zonedDateKey(today);
 
   return Array.from({ length: 42 }, (_, i) => {
     const date = new Date(gridStart);
