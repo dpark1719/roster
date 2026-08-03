@@ -59,7 +59,13 @@ export async function syncSource(source: FeedSource): Promise<SyncResult> {
   try {
     events = await ical.async.fromURL(source.feedUrl);
   } catch (err) {
-    result.error = err instanceof Error ? err.message : "Failed to fetch feed";
+    // "fetch failed" on its own is useless for diagnosis — undici hides the
+    // real reason (DNS, TLS, timeout, reset) in err.cause.
+    const cause = err instanceof Error ? (err.cause as { code?: string; message?: string }) : null;
+    const detail = cause?.code ?? cause?.message;
+    const base = err instanceof Error ? err.message : "Failed to fetch feed";
+    result.error = detail ? `${base} (${detail})` : base;
+    console.error(`[sync] ${source.key} fetch failed:`, err);
     return result;
   }
 
@@ -74,7 +80,8 @@ export async function syncSource(source: FeedSource): Promise<SyncResult> {
     const uid = event.uid;
     const title = paramValue(event.summary)?.trim();
     const startsAt = event.start ? new Date(event.start) : null;
-    const location = paramValue(event.location);
+    const rawLocation = paramValue(event.location);
+    const location = isUsableLocation(rawLocation) ? rawLocation : source.fallbackLocation;
 
     if (!uid || !title || !startsAt || startsAt < now || !isUsableLocation(location)) {
       result.skipped++;
